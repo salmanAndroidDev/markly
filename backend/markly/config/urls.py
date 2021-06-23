@@ -10,7 +10,9 @@ urlpatterns = [
     path('', include('rest_auth.urls')),  # new
     path('account/password/reset/confirm/<uidb64>/<token>/',
          PasswordResetConfirmView.as_view(),
-         name='password_reset_confirm'), ]
+         name='password_reset_confirm'),
+    path('images/',include('images.urls', namespace='images')),
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,

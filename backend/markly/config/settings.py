@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'rest_auth',
 
     # local apps
+    'images.apps.ImagesConfig',
 ]
 
 MEDIA_URL = '/media/'
