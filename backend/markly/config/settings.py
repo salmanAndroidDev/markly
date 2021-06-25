@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
     # local apps
     'images.apps.ImagesConfig',
+    'actions.apps.ActionsConfig',
 ]
 
 MEDIA_URL = '/media/'
@@ -43,6 +44,12 @@ LOGIN_URL = '/login'
 LOGOUT_URL = '/logout'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 1
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

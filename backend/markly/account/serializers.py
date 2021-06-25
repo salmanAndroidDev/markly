@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-
 from account.models import Profile
+from actions.models import Action
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -29,10 +29,15 @@ class ProfileSerializer(serializers.ModelSerializer):
     """
     photo = serializers.ImageField(required=False)
     user = UserSerializer(required=True, many=False)
+    canonical_url = serializers.SerializerMethodField(required=False)
 
     class Meta:
         model = Profile
-        fields = ('user', 'photo')
+        fields = ('id', 'user', 'photo', 'canonical_url')
+        read_only_fields = ('id',)
+
+    def get_canonical_url(self, obj):
+        return obj.get_absolute_url()
 
     def create(self, validated_data):
         validated_user_data = validated_data.pop('user')

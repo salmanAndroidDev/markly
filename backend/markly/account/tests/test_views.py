@@ -9,6 +9,19 @@ from rest_framework import status
 from account.models import Profile
 
 
+def build_url_with_query_params(url, args):
+    """Append args to url www.asdf.com?id=4&user=salman"""
+    assert type(args) == dict
+    assert type(url) == str
+    URL = url
+    if URL[-1] == '/':
+        URL = URL[:-1]
+    URL = URL + '?'
+    for key in args.keys():
+        URL = f"{URL}{key}={args[key]}&"
+    return URL[:-1]
+
+
 def create_user(username='dummy', password='dummypass1234'):
     """Handy function to create a user"""
     return get_user_model().objects.create_user(
@@ -20,11 +33,20 @@ class TestView(TestCase):
     """
         Test API view
     """
+    fixtures = ['account/fixtures/dump.json']
 
     def setUp(self):
         self.client = APIClient()
         self.user1 = create_user('user1', 'pass1234')
         self.user2 = create_user('user2', 'pass1234')
+
+    @classmethod
+    def setUpTestData(cls):
+        """Create profile for all imported users"""
+        users = get_user_model().objects.all()
+        for user in users:
+            if not Profile.objects.filter(user=user).exists():
+                Profile.objects.create(user=user)
 
     def test_registration(self):
         """Test that user can be registered"""
@@ -73,3 +95,20 @@ class TestView(TestCase):
                 self.assertTrue(is_password_true)
             else:
                 self.assertEqual(getattr(profile.user, key), payload['user'][key])
+
+    def test_follow_redirect(self):
+        """Test that not authenticated users can't access follow view"""
+        URL = reverse('account:follow')
+        response = self.client.post(URL)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_follow_view(self):
+        """Test that follow view works as expected"""
+        p1, p2, p3, p4, p5 = Profile.objects.all()[:5]
+
+        URL = build_url_with_query_params(reverse('account:follow'),
+                                          {'profile_id': p2.id,
+                                           'action': 'follow'})
+        self.client.force_login(self.user1)
+        response = self.client.post(URL)
+        print(response)

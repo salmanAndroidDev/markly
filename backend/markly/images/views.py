@@ -7,6 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from images.models import Image
 from rest_framework.response import Response
+from actions.utils import create_action
 
 
 class CreateImageView(generics.CreateAPIView):
@@ -15,7 +16,8 @@ class CreateImageView(generics.CreateAPIView):
     serializer_class = ImageCreateSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        new_item = serializer.save(user=self.request.user)
+        create_action(self.request.user, 'bookmarked image', new_item)
 
 
 class MaxinImageView:
@@ -50,6 +52,7 @@ def like_image(request):
     if action in ('like', 'dislike'):
         if action == 'like':
             image.likes.add(request.user)
+            create_action(request.user, 'likes', image)
         else:
             image.likes.remove(request.user)
 
